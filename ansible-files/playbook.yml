@@ -1,0 +1,48 @@
+# Ansible Configuration
+---
+- hosts: web_servers
+  become: yes
+  tasks:
+    - name: Install Node.js and NPM
+      shell: |
+        curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - &&\
+        sudo apt-get install -y nodejs
+
+# Web Server Setup
+    - name: Clone MERN application repository
+      git:
+        repo: 'https://github.com/Subhadeep97/TravelMemory.git'
+        dest: /var/www/mern-app
+
+# Database Server Setup
+- hosts: db_servers
+  become: yes
+  tasks:
+    - name: Install MongoDB
+      shell: echo "done"
+      # shell: |
+      #   sudo apt-get install gnupg curl
+      #   curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
+      #   sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg \
+      #   --dearmor
+      #   echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+      #   sudo apt-get update
+      #   sudo apt-get install -y mongodb-org
+
+
+# Backend Application Deployment
+- hosts: web_servers
+  become: yes
+  tasks:
+    - name: Start Node.js application
+      shell: |
+        cd /var/www/mern-app/backend
+        sudo npm install
+        sudo npm install pm2 -g
+        sudo pm2 start index.js
+# Frontend Application Deployment
+    - name: Start Node.js application
+      shell: |
+        cd /var/www/mern-app/frontend
+        sudo npm install
+        sudo nohup npm start &
